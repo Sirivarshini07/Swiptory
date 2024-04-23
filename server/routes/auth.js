@@ -9,19 +9,14 @@ const User = require("../models/user");
 const requireAuth = require("../middlewares/requireAuth");
 
 
-
-
-
-// Error handler middleware
+// Error handlling middleware
 const errorHandler = (res, error) => {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
 };
 
 
-
-
-//register
+//Register Api
 router.post("/register", async (req,res)=>{
     try {
         const { username, password} = req.body;
@@ -57,7 +52,7 @@ router.post("/register", async (req,res)=>{
 
 
 
-//Login 
+//Login Api
 router.post("/login", async(req, res)=>{
     try {
         const { username, password } = req.body;
@@ -94,13 +89,25 @@ router.post("/login", async(req, res)=>{
 });
 
 
-
-
-
-
-
-
-
-
-
-module.exports = router;
+// logout
+router.post("/logout", requireAuth, async (req, res) => {
+    try {
+        // Invalidate the token by setting its expiration time to a past date
+        const expiredToken = jwt.sign({ user: req.user.username }, process.env.JWT_SECRET, { expiresIn: 0 });
+      
+        // Respond with the expired token to ensure it's invalidated on the client side
+        res.json({ success: true, token: expiredToken, message: "Logout successful" });
+    } catch (error) {
+        errorHandler(res, error);
+    }
+});
+  
+  router.get("/validate", requireAuth, async (req, res) => {
+    try {
+      res.status(200).json({ message: "Token is valid", user: req.user });
+    } catch (error) {
+      errorHandler(res, error);
+    }
+  });
+  
+  module.exports = router;
