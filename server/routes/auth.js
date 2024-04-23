@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-
+const jwt = require("jsonwebtoken");
 const dotenv= require("dotenv");
 dotenv.config();
 
 const User = require("../models/user");
+const requireAuth = require("../middlewares/requireAuth");
 
 
 
@@ -77,10 +78,16 @@ router.post("/login", async(req, res)=>{
             return res.status(400).json({ message: "Invalid username or password" });
         }
 
+        const token = jwt.sign({user: user._id, username: user.username},process.env.JWT_SECRET,{expiresIn: "2h"});
+        //console.log(token);
+
         res.json({
             success: true,
+            token,
+            userId: user._id,
+            username: user.username,
           });
-        
+
     } catch (error) {
         errorHandler(res, error);
     }

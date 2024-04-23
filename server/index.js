@@ -4,14 +4,20 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
-
+const cors = require("cors");
+const requireAuth = require("./middlewares/requireAuth");
 
 const authRoutes = require("./routes/auth");
+const postRoutes = require("./routes/post");
+const slideRoutes = require("./routes/slide");
+const userRoutes = require("./routes/user");
+
 
 
 
 const app = express();
 
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -30,7 +36,17 @@ app.get("/", (req, res)=>{
     })
 })
 
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
+});
+
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/post", postRoutes);
+app.use("/api/slide", slideRoutes);
+
+
 const PORT= process.env.PORT || 4000;
 
 app.listen(PORT, ()=>{
